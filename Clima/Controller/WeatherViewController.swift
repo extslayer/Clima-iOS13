@@ -8,24 +8,29 @@
 
 import UIKit
 
-class WeatherViewController: UIViewController, UITextFieldDelegate {
+class WeatherViewController: UIViewController, UITextFieldDelegate, WeatherManagerDelegate {
+    
+    
+    
+    
 
     @IBOutlet weak var conditionImageView: UIImageView!
     @IBOutlet weak var temperatureLabel: UILabel!
     @IBOutlet weak var cityLabel: UILabel!
     @IBOutlet weak var searchTextField: UITextField!
     
-    let weatherManager = WeatherManager()
+    var weatherManager = WeatherManager()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        weatherManager.delegate = self
         // Do any additional setup after loading the view.
         searchTextField.delegate = self
     }
 
     @IBAction func searchPressed(_ sender: Any) {
         searchTextField.endEditing(true)
-        print(searchTextField.text!)
+        searchTextField.endEditing(true)
         if let city = searchTextField.text{
             weatherManager.fetchWeather(cityName: city)
         }
@@ -33,8 +38,8 @@ class WeatherViewController: UIViewController, UITextFieldDelegate {
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.endEditing(true)
         searchTextField.endEditing(true)
-        print(searchTextField.text!)
         if let city = searchTextField.text{
             weatherManager.fetchWeather(cityName: city)
         }
@@ -55,9 +60,22 @@ class WeatherViewController: UIViewController, UITextFieldDelegate {
         if let city = searchTextField.text{
             weatherManager.fetchWeather(cityName: city)
         }
-        
         searchTextField.text = ""
     }
+    
+    func didUpdateWeather(_ weatherManager : WeatherManager,weather: WeatherModel) {
+        DispatchQueue.main.async {
+            self.temperatureLabel.text = "\(weather.temperature)"
+            self.cityLabel.text = weather.cityName
+            print(weather.conditionName)
+            self.conditionImageView.image = UIImage(systemName: weather.conditionName)
+        }
+    }
+    
+    func didFailWithError(error: any Error) {
+        print(error)
+    }
+
     
 }
 
